@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nútrete Con Ciencia - Registro de Pacientes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            institucional: '#B1B1D9',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-institucional/10 text-gray-800">
+  <!-- Encabezado -->
+  <header class="bg-institucional text-white p-4 shadow-md">
+    <h1 class="text-2xl font-bold text-center">Clínica Nútrete Con Ciencia</h1>
+    <p class="text-center text-sm">Registro de Pacientes y Gestión de Citas</p>
+  </header>
+
+  <!-- Formulario principal -->
+  <main class="p-6 max-w-4xl mx-auto">
+    <form id="formulario" class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
+      <!-- Datos del Paciente -->
+      <h2 class="text-xl font-semibold text-institucional">Datos del Paciente</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" placeholder="Nombre completo" class="input" required />
+        <input type="number" placeholder="Edad" class="input" required />
+        <select class="input" required>
+          <option value="">Sexo</option>
+          <option>Mujer</option>
+          <option>Hombre</option>
+          <option>Otro</option>
+        </select>
+        <input type="text" placeholder="Ocupación" class="input" />
+        <div>
+          <input id="telefono" type="tel" placeholder="Número de contacto" class="input" pattern="[0-9]{10}" maxlength="10" required />
+          <p id="errorTelefono" class="text-red-600 text-sm mt-1 hidden">Ingresa un número válido de 10 dígitos.</p>
+        </div>
+        <input type="email" placeholder="Correo electrónico" class="input" />
+      </div>
+
+      <!-- Datos de la Cita -->
+      <h2 class="text-xl font-semibold text-institucional">Datos de la Cita</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" placeholder="Motivo de la cita" class="input" required />
+        <input type="text" placeholder="Tipo de enfermedad (si aplica)" class="input" />
+        <input type="date" class="input" required />
+        <input type="time" class="input" required />
+      </div>
+
+      <!-- Botón -->
+      <div class="text-center pt-4">
+        <button type="submit" class="bg-institucional text-white px-6 py-2 rounded-xl hover:bg-institucional/80">
+          Registrar Cita
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Estilos personalizados -->
+  <style>
+    .input {
+      @apply border border-gray-300 rounded-xl px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-institucional;
+    }
+  </style>
+
+  <!-- Script para enviar a Google Sheets -->
+  <script>
+    document.getElementById('formulario').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const telefono = document.getElementById('telefono');
+      const error = document.getElementById('errorTelefono');
+      const valor = telefono.value.trim();
+
+      if (!/^\d{10}$/.test(valor)) {
+        error.classList.remove('hidden');
+        telefono.classList.add('border-red-500');
+        telefono.focus();
+        return;
+      } else {
+        error.classList.add('hidden');
+        telefono.classList.remove('border-red-500');
+      }
+
+      const data = {
+        nombre: form[0].value,
+        edad: form[1].value,
+        sexo: form[2].value,
+        ocupacion: form[3].value,
+        telefono: form[4].value,
+        correo: form[6].value,
+        motivo: form[7].value,
+        enfermedad: form[8].value,
+        fecha: form[9].value,
+        hora: form[10].value
+      };
+
+      const url = "https://script.google.com/macros/s/AKfycbx87fY3gssQUcJFbgpt-kZH_RnTh-inJ2ud4t5zjBU6mPJ0fi3CKjRAOwh87pszTbmy1g/exec";
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.ok) {
+          alert('Cita registrada exitosamente.');
+          form.reset();
+        } else {
+          alert('Hubo un error al registrar la cita.');
+        }
+      } catch (error) {
+        alert('Error de conexión.');
+      }
+    });
+  </script>
+</body>
+</html>
